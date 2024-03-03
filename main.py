@@ -8,6 +8,9 @@ import ollama
 
 vosk_model_path = "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-model-en-us-0.42-gigaspeech"
 
+# you can change the wake word to whatever you want
+wake_word = "hey ai".lower()
+
 
 def send_to_ai(content):
     response = ollama.chat(
@@ -41,6 +44,8 @@ def main():
         if rec.AcceptWaveform(data):
             r = json.loads(rec.Result())
             result = r["text"]
+            if not wake_word in result:
+                continue
             action = send_to_ai(
                 "Which thing is the user trying to do: turn on the tv (tv_on), turn on the lights (lights_on), ask a question (question), other (other). Answer with respective alias provided: "
                 + result
