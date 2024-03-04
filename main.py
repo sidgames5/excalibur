@@ -48,7 +48,7 @@ def main():
             if not wake_word in result:
                 continue
             action = send_to_ai(
-                "Which thing is the user trying to do: turn on the tv (tv_on), turn on the lights (lights_on), ask a question (question), other (other). Answer with respective alias provided: "
+                "Which thing is the user trying to do: turn on the tv (tv_on), turn on the lights (lights_on), ask a question (question), other (other), unable to understand the prompt (invalid). Answer with respective alias provided: "
                 + result
             )
             print(action)
@@ -60,6 +60,10 @@ def main():
                 continue
             if "question" in action:
                 print(send_to_ai(result))
+                continue
+
+            if "invalid" in action:
+                print("I didn't understand that.")
                 continue
 
             if "other" in action:
