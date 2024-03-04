@@ -44,6 +44,7 @@ def main():
         if rec.AcceptWaveform(data):
             r = json.loads(rec.Result())
             result = r["text"]
+            print(result)
             if not wake_word in result:
                 continue
             action = send_to_ai(
@@ -51,14 +52,19 @@ def main():
                 + result
             )
             print(action)
-            if "other" in action:
-                print("I'm sorry but I don't have the ability to do this yet.")
             if "tv_on" in action:
                 print("You do not have a TV connected.")
+                continue
             if "lights_on" in action:
                 print("You do not have any lights connected.")
+                continue
             if "question" in action:
                 print(send_to_ai(result))
+                continue
+
+            if "other" in action:
+                print("I'm sorry but I don't have the ability to do this yet.")
+                continue
 
 
 if __name__ == "__main__":
