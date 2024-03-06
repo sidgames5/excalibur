@@ -7,6 +7,8 @@ import pyaudio
 import ollama
 import pyttsx3
 
+version = "0.1.0"
+
 vosk_model_path = "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-model-en-us-0.42-gigaspeech"
 
 # you can change the wake word to whatever you want
@@ -33,6 +35,7 @@ def say(text):
 
 
 def main():
+    print("Version: " + version)
     ttsengine = pyttsx3.init()
     ttsengine.setProperty("rate", 125)
 
