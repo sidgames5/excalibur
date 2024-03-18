@@ -5,7 +5,7 @@ import json
 from vosk import Model, KaldiRecognizer
 import pyaudio
 import ollama
-import pyttsx3
+from gtts import gTTS
 
 version = "0.1.0"
 
@@ -15,6 +15,7 @@ vosk_model_path = "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-mod
 
 # you can change the wake word to whatever you want
 wake_word = "hey sudo".lower()
+# i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
 ai_model = "mistral"
 # you can use any LLM model supported by ollama
@@ -32,12 +33,10 @@ def send_to_ai(content):
     return response["message"]["content"]
 
 
-ttsengine = pyttsx3.init(driverName="espeak")
-
-
 def say(text):
-    ttsengine.say(text)
-    ttsengine.runAndWait()
+    tts = gTTS(text, lang="en", tld="com")
+    tts.save("./tts/speech.mp3")
+    os.system("mpg123 ./tts/speech.mp3")
     print("debug: done talking")
 
 
@@ -47,8 +46,6 @@ def say(text):
 
 def main():
     print("Version: " + version)
-    ttsengine = pyttsx3.init()
-    ttsengine.setProperty("rate", 100)
 
     model = Model(vosk_model_path)
     rec = KaldiRecognizer(model, 16000)
@@ -74,7 +71,13 @@ def main():
             print(result)
             if not wake_word in result:
                 continue
-            say(send_to_ai(result))
+            print(result[len(wake_word) :])
+            say(
+                send_to_ai(
+                    "Respond to the prompt and please keep your response shorter than 50 words: "
+                    + result[len(wake_word) :]
+                )
+            )
             continue
 
 

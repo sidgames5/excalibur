@@ -12,9 +12,12 @@ Currently it is meant to be deployed on a desktop or laptop computer. In theory 
 
 🟩 Fully working
 
-⬛ Not tested yet
+⬛ Not tested yet/not implemented
 
-| Device/OS | Status |
-|-|-|
-| Linux | 🟨 |
-| Windows | ⬛ |
+| Feature | Windows | MacOS | Linux |
+|-|-|-|-|
+| Basic questions | ⬛ | ⬛ | 🟩 |
+| Advanced questions | ⬛ | ⬛ | ⬛ |
+| Time | ⬛ | ⬛ | ⬛ |
+| Weather | ⬛ | ⬛ | ⬛ |
+| Smart device control | ⬛ | ⬛ | ⬛ |
