@@ -6,6 +6,7 @@ from vosk import Model, KaldiRecognizer
 import pyaudio
 import ollama
 from gtts import gTTS
+from datetime import datetime
 
 version = "0.1.0"
 
@@ -17,8 +18,11 @@ vosk_model_path = "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-mod
 wake_word = "hey sudo".lower()
 # i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
-ai_model = "mistral"
 # you can use any LLM model supported by ollama
+ai_model = "mistral"
+
+# should the clock be displayed in 24-hour time (19:44) or 12-hour time (7:44 PM)
+clock_24_hours = False
 
 # -----------------------------------
 
@@ -71,13 +75,38 @@ def main():
             print(result)
             if not wake_word in result:
                 continue
-            print(result[len(wake_word) :])
-            say(
-                send_to_ai(
-                    "Respond to the prompt and please keep your response shorter than 50 words: "
-                    + result[len(wake_word) :]
+
+            if "weather" in result:
+                # TODO: add weather
+                say(
+                    "I'm sorry but I don't have the ability to give you the weather just yet."
                 )
-            )
+            elif "time" in result:
+                # Get the current date and time
+                current_date_time = datetime.now()
+
+                # Format the current time with AM/PM
+                thours = current_date_time.strftime("%I")
+                tmins = current_date_time.strftime("%M")
+                tpm = "AM"
+                if clock_24_hours:
+                    tpm = ""
+                    thours = current_date_time.strftime("%H")
+                else:
+                    tpm = current_date_time.strftime("%p")
+                text_to_say = f"The time is currently {thours} "
+                if tmins == "00":
+                    text_to_say = text_to_say + f"o'clock {tpm}."
+                else:
+                    text_to_say = text_to_say + f"{tmins} {tpm}."
+                say(text_to_say)
+            else:
+                say(
+                    send_to_ai(
+                        "Respond to the prompt and please keep your response shorter than 50 words: "
+                        + result[len(wake_word) :]
+                    )
+                )
             continue
 
 

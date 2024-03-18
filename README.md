@@ -15,10 +15,12 @@ A simple voice assistant that respects your privacy.
 | Feature | Windows | MacOS | Linux |
 |-|-|-|-|
 | Basic questions | ⬛ | ⬛ | 🟩 |
-| Advanced questions | ⬛ | ⬛ | ⬛ |
-| Time | ⬛ | ⬛ | ⬛ |
+| Advanced questions* | ⬛ | ⬛ | ⬛ |
+| Time | ⬛ | ⬛ | 🟩 |
 | Weather | ⬛ | ⬛ | ⬛ |
 | Smart device control | ⬛ | ⬛ | ⬛ |
+
+\* Advanced questions are questions that require searching on the internet
 
 ## Deployment
 
