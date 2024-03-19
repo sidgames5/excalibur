@@ -7,6 +7,8 @@ import pyaudio
 import ollama
 from gtts import gTTS
 from datetime import datetime
+from metar import Metar
+import requests
 
 version = "0.1.0"
 
@@ -23,6 +25,16 @@ ai_model = "mistral"
 
 # should the clock be displayed in 24-hour time (19:44) or 12-hour time (7:44 PM)
 clock_24_hours = False
+
+# should units be in imperial
+units_imperial = True
+
+
+# DO NOT EDIT THE FOLLOWING
+
+import api_keys
+
+# openweather_api_key = api_keys.openweather
 
 # -----------------------------------
 
@@ -77,10 +89,70 @@ def main():
                 continue
 
             if "weather" in result:
-                # TODO: add weather
-                say(
-                    "I'm sorry but I don't have the ability to give you the weather just yet."
-                )
+                weather_data = ""
+                # the station should be changed based on the location
+                station = "KAGC"
+                url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={station}&hours=0"
+                response = requests.get(url)
+                weather_data = response.text
+                obs = Metar.Metar(f"METAR {weather_data}")
+
+                temp = 0
+                if units_imperial:
+                    temp = round((obs.temp.value() * 1.8) + 32)
+                sky = obs.sky
+                conditions = obs.weather
+
+                text_to_say = f"It is currently {temp} degrees "
+
+                if units_imperial:
+                    text_to_say = text_to_say + "fahrenheit "
+                else:
+                    text_to_say = text_to_say + "celsius "
+
+                for entry in sky:
+                    if "OVC" in entry:
+                        text_to_say = text_to_say + "and cloudy. "
+                        break
+                    elif "BKN" in entry:
+                        text_to_say = text_to_say + "with broken clouds. "
+                        break
+                    elif "SCT" in entry:
+                        text_to_say = text_to_say + "with scattered clouds. "
+                        break
+                    elif "CLR" in entry:
+                        night = False
+                        if obs.time.hour >= 18 or obs.time.hour <= 6:
+                            night = True
+                        if not night:
+                            text_to_say = text_to_say + "and sunny. "
+
+                ecount = 0
+                for entry in conditions:
+                    if ecount == 0:
+                        text_to_say = text_to_say + "There is currently "
+                    else:
+                        text_to_say = text_to_say + "and "
+
+                    ecount += 1
+
+                    if "-" in entry:
+                        text_to_say = text_to_say + "light "
+                    elif "+" in entry:
+                        text_to_say = text_to_say + "heavy "
+                    else:
+                        text_to_say = text_to_say + "moderate "
+
+                    if "SN" in entry:
+                        text_to_say = text_to_say + "snow "
+                    elif "RA" in entry:
+                        text_to_say = text_to_say + "rain "
+                    elif "GR" in entry:
+                        text_to_say = text_to_say + "hail "
+                    elif "BR" in entry:
+                        text_to_say = text_to_say + "mist "
+
+                say(text_to_say)
             elif "time" in result:
                 # Get the current date and time
                 current_date_time = datetime.now()
