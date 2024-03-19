@@ -17,7 +17,7 @@ version = "0.1.0"
 vosk_model_path = "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-model-en-us-0.42-gigaspeech"
 
 # you can change the wake word to whatever you want
-wake_word = "hey sudo".lower()
+wake_word = "hey excalibur".lower()
 # i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
 # you can use any LLM model supported by ollama

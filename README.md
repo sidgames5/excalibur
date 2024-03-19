@@ -1,4 +1,4 @@
-# Voice Assistant
+# Excalibur
 
 A simple voice assistant that respects your privacy. All voice assistants and smart speakers use proprietary systems and are spying on us 24/7. The goal of this project is to replace all of the spyware voice assistants in your digital life.
 
