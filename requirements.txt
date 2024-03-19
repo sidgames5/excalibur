@@ -3,3 +3,8 @@ pyaudio
 ollama
 gTTS
 metar
+langchain
+
+
+# modules
+duckduckgo-search

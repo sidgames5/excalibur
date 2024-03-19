@@ -10,16 +10,12 @@ from datetime import datetime
 from metar import Metar
 import requests
 
+from agent import agent_executor
+
 version = "0.1.1"
 
 def send_to_ai(content):
-    response = ollama.chat(
-        model="mistral",
-        messages=[
-            {"role": "user", "content": content},
-        ],
-    )
-    return response["message"]["content"]
+    return agent_executor.invoke({"input": content})["output"]
 
 
 def say(text):
@@ -60,97 +56,7 @@ def main():
             if not os.environ.get("WAKE_WORD") in result:
                 continue
 
-            if "weather" in result:
-                weather_data = ""
-                # the station should be changed based on the location
-                url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids={}&hours=0".format(os.environ.get("WEATHER_STATION"))
-                response = requests.get(url)
-                weather_data = response.text
-                obs = Metar.Metar(f"METAR {weather_data}")
-
-                temp = 0
-                if os.environ.get("IMPERIAL_UNITS"):
-                    temp = round((obs.temp.value() * 1.8) + 32)
-                sky = obs.sky
-                conditions = obs.weather
-
-                text_to_say = f"It is currently {temp} degrees "
-
-                if os.environ.get("IMPERIAL_UNITS"):
-                    text_to_say = text_to_say + "fahrenheit "
-                else:
-                    text_to_say = text_to_say + "celsius "
-
-                for entry in sky:
-                    if "OVC" in entry:
-                        text_to_say = text_to_say + "and cloudy. "
-                        break
-                    elif "BKN" in entry:
-                        text_to_say = text_to_say + "with broken clouds. "
-                        break
-                    elif "SCT" in entry:
-                        text_to_say = text_to_say + "with scattered clouds. "
-                        break
-                    elif "CLR" in entry:
-                        night = False
-                        if obs.time.hour >= 18 or obs.time.hour <= 6:
-                            night = True
-                        if not night:
-                            text_to_say = text_to_say + "and sunny. "
-
-                ecount = 0
-                for entry in conditions:
-                    if ecount == 0:
-                        text_to_say = text_to_say + "There is currently "
-                    else:
-                        text_to_say = text_to_say + "and "
-
-                    ecount += 1
-
-                    if "-" in entry:
-                        text_to_say = text_to_say + "light "
-                    elif "+" in entry:
-                        text_to_say = text_to_say + "heavy "
-                    else:
-                        text_to_say = text_to_say + "moderate "
-
-                    if "SN" in entry:
-                        text_to_say = text_to_say + "snow "
-                    elif "RA" in entry:
-                        text_to_say = text_to_say + "rain "
-                    elif "GR" in entry:
-                        text_to_say = text_to_say + "hail "
-                    elif "BR" in entry:
-                        text_to_say = text_to_say + "mist "
-
-                say(text_to_say)
-            elif "time" in result:
-                # Get the current date and time
-                current_date_time = datetime.now()
-
-                # Format the current time with AM/PM
-                thours = current_date_time.strftime("%I")
-                tmins = current_date_time.strftime("%M")
-                tpm = "AM"
-                if os.environ.get("CLOCKS_24_HOURS"):
-                    tpm = ""
-                    thours = current_date_time.strftime("%H")
-                else:
-                    tpm = current_date_time.strftime("%p")
-                text_to_say = f"The time is currently {thours} "
-                if tmins == "00":
-                    text_to_say = text_to_say + f"o'clock {tpm}."
-                else:
-                    text_to_say = text_to_say + f"{tmins} {tpm}."
-                say(text_to_say)
-            else:
-                say(
-                    send_to_ai(
-                        "Respond to the prompt and please keep your response shorter than 50 words: "
-                        + result[len(os.environ.get("WAKE_WORD")) :]
-                    )
-                )
-            continue
+            say(send_to_ai(result[len(os.environ.get("WAKE_WORD")):]))
 
 
 if __name__ == "__main__":
