@@ -29,6 +29,10 @@ clock_24_hours = False
 # should units be in imperial
 units_imperial = True
 
+# this is the 4 letter code (ICAO) of your nearest airport
+# this can be found on https://www.faa.gov/air_traffic/weather/asos
+weather_station = "KAGC"
+
 
 # DO NOT EDIT THE FOLLOWING
 
@@ -91,8 +95,7 @@ def main():
             if "weather" in result:
                 weather_data = ""
                 # the station should be changed based on the location
-                station = "KAGC"
-                url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={station}&hours=0"
+                url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={weather_station}&hours=0"
                 response = requests.get(url)
                 weather_data = response.text
                 obs = Metar.Metar(f"METAR {weather_data}")
