@@ -3,6 +3,10 @@
 
 # custom
 resources/*
+vosk
+tts/*
+!tts/DONT-DELETE-THIS-FOLDER
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
