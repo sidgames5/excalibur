@@ -213,12 +213,17 @@ def main():
                     text_to_say = text_to_say + f"{tmins} {tpm}."
                 say(text_to_say)
             else:
-                say(
-                    send_to_ai(
-                        "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. Now here is the user's prompt: "
-                        + result[len(wake_word) :]
-                    )
+                ai_res = send_to_ai(
+                    "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. Now here is the user's prompt: "
+                    + result[len(wake_word) :]
                 )
+
+                send_to_tts = ""
+                if ai_res.startswith(" web\_search"):
+                    query = ai_res[len(" web\_search") + 2 :]
+                else:
+                    send_to_tts = ai_res
+                say(send_to_tts)
             continue
 
 
