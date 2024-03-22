@@ -14,7 +14,9 @@ version = "0.1.0"
 
 # ---------- CONFIGURATION ----------
 
-vosk_model_path = "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-model-en-us-0.42-gigaspeech"
+vosk_model_path = (
+    "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-model-en-us-0.22"
+)
 
 # you can change the wake word to whatever you want
 wake_word = "hey excalibur".lower()
@@ -22,6 +24,9 @@ wake_word = "hey excalibur".lower()
 
 # you can use any LLM model supported by ollama
 ai_model = "mistral"
+
+# this mode disables voice input and text-to-speech and requires you to type
+text_only_mode = True
 
 # should the clock be displayed in 24-hour time (19:44) or 12-hour time (7:44 PM)
 clock_24_hours = False
@@ -54,42 +59,51 @@ def send_to_ai(content):
 
 
 def say(text):
-    tts = gTTS(text, lang="en", tld="com")
-    tts.save("./tts/speech.mp3")
-    os.system("mpg123 ./tts/speech.mp3")
-    print("debug: done talking")
-
-
-# DEBUGGING NOTES
-# "done talking" does not get printed even after it is done talking
+    if not text_only_mode:
+        tts = gTTS(text, lang="en", tld="com")
+        tts.save("./tts/speech.mp3")
+        os.system("mpg123 ./tts/speech.mp3")
+    else:
+        print(text)
 
 
 def main():
     print("Version: " + version)
 
-    model = Model(vosk_model_path)
-    rec = KaldiRecognizer(model, 16000)
+    if not text_only_mode:
+        model = Model(vosk_model_path)
+        rec = KaldiRecognizer(model, 16000)
 
-    p = pyaudio.PyAudio()
-    stream = p.open(
-        format=pyaudio.paInt16,
-        channels=1,
-        rate=16000,
-        input=True,
-        frames_per_buffer=8000,
-    )
+        p = pyaudio.PyAudio()
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=1,
+            rate=16000,
+            input=True,
+            frames_per_buffer=8000,
+        )
 
-    print("Listening")
+        print("Listening!")
+    else:
+        print("Ready!")
 
     while True:
-        data = stream.read(2000)
+        data = None
+        if text_only_mode:
+            data = input("Type a prompt: ")
+        else:
+            data = stream.read(1000)
         if len(data) == 0:
             continue
-        if rec.AcceptWaveform(data):
-            r = json.loads(rec.Result())
-            result = r["text"]
-            print(result)
-            if not wake_word in result:
+        if (not text_only_mode and rec.AcceptWaveform(data)) or (text_only_mode):
+            result = ""
+            if text_only_mode:
+                result = data
+            else:
+                r = json.loads(rec.Result())
+                result = r["text"]
+                print(result)
+            if (not wake_word) and (not text_only_mode) in result:
                 continue
 
             if "weather" in result:
