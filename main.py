@@ -9,6 +9,7 @@ from gtts import gTTS
 from datetime import datetime
 from metar import Metar
 import requests
+from duckduckgo_search import DDGS
 
 version = "1.1.0-dev"
 
@@ -221,6 +222,12 @@ def main():
                 send_to_tts = ""
                 if ai_res.lower().startswith(" web\_search"):
                     query = ai_res[len(" web\_search") + 2 :]
+                    ddgs_res = DDGS().text(query, max_results=5)
+                    ai_summary = send_to_ai(
+                        "Please summarize the data provided into one or two sentences. The data is formatted in json. Make your response seem like you are answering a question and not summarizing the data. Here is the data: "
+                        + str(ddgs_res)
+                    )
+                    send_to_tts = ai_summary
                 elif ai_res.lower().startswith(" play"):
                     playlist_name = ""
                     if ai_res.lower().startswith(" play\_playlist"):
