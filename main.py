@@ -82,6 +82,7 @@ def main():
     stationres = requests.get(stationresurl)
     weather_station = stationres.text
     print("Weather data will come from airport " + weather_station)
+    print("Weather data may be for the wrong location if you are using a VPN")
 
     if not text_only_mode:
         model = Model(vosk_model_path)
