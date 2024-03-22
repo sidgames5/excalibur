@@ -225,8 +225,10 @@ def main():
                     playlist_name = ""
                     if ai_res.lower().startswith(" play\_playlist"):
                         playlist_name = ai_res[len(" play\_playlist: ") :]
-                    else:
+                    elif ai_res.lower().startswith(" play\_music"):
                         # TODO: find the user's playlists and select a random one
+                        pass
+                    else:
                         pass
                 else:
                     send_to_tts = ai_res
