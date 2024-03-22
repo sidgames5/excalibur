@@ -4,13 +4,13 @@ import wave
 import json
 from vosk import Model, KaldiRecognizer
 import pyaudio
-import ollama
+from ollama import Client
 from gtts import gTTS
 from datetime import datetime
 from metar import Metar
 import requests
 
-version = "1.0.0"
+version = "1.1.0-dev"
 
 # ---------- CONFIGURATION ----------
 
@@ -43,6 +43,10 @@ weather_station = "KAGC"
 # you can find the ip to airport server at https://github.com/sidgames5/ip-to-airport
 ip_to_airport_url = "http://localhost:3000"
 
+# if you would like to run ollama on a GPU server, you can change the address of the ollama server here
+# if you are running ollama locally, there is nothing you have to do
+ollama_url = "http://localhost:11434"
+
 
 # DO NOT EDIT THE FOLLOWING
 
@@ -52,9 +56,11 @@ ip_to_airport_url = "http://localhost:3000"
 
 # -----------------------------------
 
+client = Client(ollama_url)
+
 
 def send_to_ai(content):
-    response = ollama.chat(
+    response = client.chat(
         model="mistral",
         messages=[
             {"role": "user", "content": content},
