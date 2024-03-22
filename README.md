@@ -19,6 +19,7 @@ A simple voice assistant that respects your privacy. All voice assistants and sm
 | Time | ⬛ | 🟩 | 🟩 |
 | Weather | ⬛ | 🟩 | 🟩 |
 | Smart device control | ⬛ | ⬛ | ⬛ |
+| Music control | ⬛ | ⬛ | 🟨 |
 
 \* Advanced questions are questions that require searching on the internet
 
