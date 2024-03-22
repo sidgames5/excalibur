@@ -14,8 +14,10 @@ A simple voice assistant that respects your privacy. All voice assistants and sm
 
 | Feature | Windows | MacOS | Linux |
 |-|-|-|-|
+| Speech recognition | ⬛ | ⬛ | 🟩 |
+| Text to speech | ⬛ | ⬛ | 🟩 |
 | Basic questions | ⬛ | 🟩 | 🟩 |
-| Advanced questions* | ⬛ | ⬛ | 🟨 |
+| Advanced questions* | ⬛ | ⬛ | 🟩 |
 | Time | ⬛ | 🟩 | 🟩 |
 | Weather | ⬛ | 🟩 | 🟩 |
 | Smart device control | ⬛ | ⬛ | ⬛ |
