@@ -150,6 +150,9 @@ def main():
                     elif "SCT" in entry:
                         text_to_say = text_to_say + "with scattered clouds. "
                         break
+                    elif "FEW" in entry:
+                        text_to_say = text_to_say + "with few clouds. "
+                        break
                     elif "CLR" in entry:
                         night = False
                         if obs.time.hour >= 18 or obs.time.hour <= 6:
