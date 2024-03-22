@@ -36,7 +36,12 @@ units_imperial = True
 
 # this is the 4 letter code (ICAO) of your nearest airport
 # this can be found on https://www.faa.gov/air_traffic/weather/asos
+# THIS IS NOT NEEDED ANYMORE
+# as long as you have an internet connection you do not need to set the variable
 weather_station = "KAGC"
+# this is for automatic weather station detection
+# you can find the ip to airport server at https://github.com/sidgames5/ip-to-airport
+ip_to_airport_url = "http://localhost:3000"
 
 
 # DO NOT EDIT THE FOLLOWING
@@ -69,6 +74,14 @@ def say(text):
 
 def main():
     print("Version: " + version)
+
+    # Set the weather station from location
+    ipres = requests.get("http://ip-api.com/json")
+    ip = ipres.json()["query"]
+    stationresurl = ip_to_airport_url + "/v1?ip=" + ip
+    stationres = requests.get(stationresurl)
+    weather_station = stationres.text
+    print("Weather data will come from airport " + weather_station)
 
     if not text_only_mode:
         model = Model(vosk_model_path)
