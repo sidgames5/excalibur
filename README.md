@@ -37,6 +37,7 @@ Currently it is meant to be deployed on a desktop or laptop computer. In theory 
 - Ollama
 - Vosk model
 - Internet connection
+- [IP to airport server](https://github.com/sidgames5/ip-to-airport)
 - Fast graphics card***
 
 ### Instructions
@@ -51,7 +52,8 @@ Currently it is meant to be deployed on a desktop or laptop computer. In theory 
 4. Set a custom wake word by changing `wake_word` in `main.py`*
 5. Set a custom LLM model by changing `ai_model` in `main.py`**
 6. Run `ollama serve` in a terminal window
-7. Connect a microphone and speaker to your computer (you can use a built-in one)
-8. Install the required python dependencies listed in the top of `main.py`
-9. Run `python main.py` in a new terminal window
-10. Give microphone access to the program if necessary
+7. Run the IP to airport server in a terminal window
+8. Connect a microphone and speaker to your computer (you can use a built-in one)
+9. Install the required python dependencies listed in the top of `main.py`
+10. Run `python main.py` in a new terminal window
+11. Give microphone access to the program if necessary
