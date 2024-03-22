@@ -111,7 +111,7 @@ def main():
         if (not text_only_mode and rec.AcceptWaveform(data)) or (text_only_mode):
             result = ""
             if text_only_mode:
-                result = data
+                result = wake_word + " " + data
             else:
                 r = json.loads(rec.Result())
                 result = r["text"]
