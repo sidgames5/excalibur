@@ -192,7 +192,7 @@ def main():
             else:
                 say(
                     send_to_ai(
-                        "Respond to the prompt and please keep your response shorter than 50 words: "
+                        "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. Now here is the user's prompt: "
                         + result[len(wake_word) :]
                     )
                 )
