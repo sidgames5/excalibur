@@ -120,7 +120,7 @@ def main():
             if (not wake_word) and (not text_only_mode) in result:
                 continue
 
-            if "weather" in result:
+            if "weather" in result or "temperature" in result:
                 weather_data = ""
                 # the station should be changed based on the location
                 url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={weather_station}&hours=0"
