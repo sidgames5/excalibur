@@ -48,6 +48,8 @@ ip_to_airport_url = "http://localhost:3000"
 # if you are running ollama locally, there is nothing you have to do
 ollama_url = "http://10.0.138.207:11434"
 
+personalization_file_path = "./personalization.txt"
+
 
 # DO NOT EDIT THE FOLLOWING
 
@@ -60,6 +62,10 @@ ollama_url = "http://10.0.138.207:11434"
 client = Client(ollama_url)
 
 convo_history = []
+
+personalization = ""
+with open(personalization_file_path, "r") as f:
+    personalization = f.read()
 
 
 def send_to_ai(content):
@@ -233,7 +239,9 @@ def main():
                 ai_res = send_to_ai(
                     "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. DO NOT SAY THAT YOU NEED TO PERFORM A WEB SEARCH AND YOU DON'T HAVE REAL TIME ACCESS, JUST WRITE THE WEB SEARCH PROMPT. If you are able to give a quality answer without using an internet search, DO NOT PUT THE PROMPT FOR A WEB SEARCH. If you do not need to perform a web search, please do not mention it in your response. The same thing goes for if you do need to perform a web search, just don't mention it in your response. And please don't put in the web search prompt if you want the user to search something up. In addition to a web search, you also have the ability to play music. If the user requests to play a playlist, write the following WITH THE EXACT WORDING: `play_playlist: <insert playlist name here>`. If the user does not specify the playlist name, write the following WITH THE EXACT WORDING: `play_music`. I will also provide the conversation history. Please ignore the last element of the list. "
                     + str(convo_history)
-                    + " Please do not write something along the lines of `based on the conversation history` in your response. When you give your response, pretend that you are talking directly to the user. Absolutely DO NOT put any special instructions in your response if the user does not explicitly state to do that. Now here is the user's prompt: "
+                    + " Please do not write anything along the lines of `based on the conversation history` in your response. When you give your response, pretend that you are talking directly to the user. Absolutely DO NOT put any special instructions in your response if the user does not explicitly state to do that. In addition to all of those resources, you can also use the user's personalization file. Please do not write anything along the lines of `based on your preference` in your response. Here is the personalization file: "
+                    + personalization
+                    + " Now here is the user's prompt: "
                     + result[len(wake_word) :]
                 )
 

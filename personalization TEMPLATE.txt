@@ -1,0 +1,1 @@
+This file is used to personalize your AI. In here write a paragraph about yourself and your preferences. Once you are done, rename the file to "personalization.txt".
