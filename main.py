@@ -27,7 +27,7 @@ wake_word = "hey excalibur".lower()
 ai_model = "mistral"
 
 # this mode disables voice input and text-to-speech and requires you to type
-text_only_mode = True
+text_only_mode = False
 
 # should the clock be displayed in 24-hour time (19:44) or 12-hour time (7:44 PM)
 clock_24_hours = False
@@ -83,6 +83,10 @@ def say(text):
 
 
 def main():
+    convo_active = False
+    convo_no_talk_time = 0
+    convo_no_talk_time_limit = 200
+
     print("Version: " + version)
 
     # Set the weather station from location
@@ -116,7 +120,12 @@ def main():
         if text_only_mode:
             data = input("Type a prompt: ")
         else:
-            data = stream.read(1000)
+            data = stream.read(500)
+            convo_no_talk_time += 1
+            if convo_no_talk_time >= convo_no_talk_time_limit:
+                convo_active = False
+                # print(convo_no_talk_time)
+                # print(convo_no_talk_time_limit)
         if len(data) == 0:
             continue
         if (not text_only_mode and rec.AcceptWaveform(data)) or (text_only_mode):
@@ -127,9 +136,11 @@ def main():
                 r = json.loads(rec.Result())
                 result = r["text"]
                 print(result)
-            if (not wake_word) and (not text_only_mode) in result:
+            if (not wake_word in result) and (not convo_active):
                 continue
 
+            convo_active = True
+            convo_no_talk_time = 0
             convo_history.append(result)
 
             if "weather" in result or "temperature" in result:
@@ -222,7 +233,7 @@ def main():
                 ai_res = send_to_ai(
                     "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. DO NOT SAY THAT YOU NEED TO PERFORM A WEB SEARCH AND YOU DON'T HAVE REAL TIME ACCESS, JUST WRITE THE WEB SEARCH PROMPT. If you are able to give a quality answer without using an internet search, DO NOT PUT THE PROMPT FOR A WEB SEARCH. If you do not need to perform a web search, please do not mention it in your response. The same thing goes for if you do need to perform a web search, just don't mention it in your response. And please don't put in the web search prompt if you want the user to search something up. In addition to a web search, you also have the ability to play music. If the user requests to play a playlist, write the following WITH THE EXACT WORDING: `play_playlist: <insert playlist name here>`. If the user does not specify the playlist name, write the following WITH THE EXACT WORDING: `play_music`. I will also provide the conversation history. Please ignore the last element of the list. "
                     + str(convo_history)
-                    + " Now here is the user's prompt: "
+                    + " When you give your response, pretend that you are talking directly to the user. Now here is the user's prompt: "
                     + result[len(wake_word) :]
                 )
 
@@ -231,7 +242,7 @@ def main():
                     query = ai_res[len(" web\_search") + 2 :]
                     ddgs_res = DDGS().text(query, max_results=5)
                     ai_summary = send_to_ai(
-                        "Please summarize the data provided into one or two sentences. The data is formatted in json. Make your response seem like you are answering a question and not summarizing the data. Here is the data: "
+                        "Please summarize the data provided into one or two sentences. The data is formatted in json. Make your response seem like you are answering a question and not summarizing the data. When you are giving your response, pretend that you are directly talking to the user. Here is the data: "
                         + str(ddgs_res)
                     )
                     send_to_tts = ai_summary
