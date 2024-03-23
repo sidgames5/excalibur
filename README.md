@@ -58,5 +58,6 @@ Currently it is meant to be deployed on a desktop or laptop computer. In theory 
 7. Run the IP to airport server in a terminal window
 8. Connect a microphone and speaker to your computer (you can use a built-in one)
 9. Install the required python dependencies listed in the top of `main.py`
-10. Run `python main.py` in a new terminal window
-11. Give microphone access to the program if necessary
+10. Follow the instructions in `personalization TEMPLATE.txt`
+11. Run `python main.py` in a new terminal window
+12. Give microphone access to the program if necessary
