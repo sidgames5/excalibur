@@ -59,6 +59,8 @@ ollama_url = "http://localhost:11434"
 
 client = Client(ollama_url)
 
+convo_history = []
+
 
 def send_to_ai(content):
     response = client.chat(
@@ -71,6 +73,7 @@ def send_to_ai(content):
 
 
 def say(text):
+    convo_history.append(text)
     if not text_only_mode:
         tts = gTTS(text, lang="en", tld="com")
         tts.save("./tts/speech.mp3")
@@ -126,6 +129,8 @@ def main():
                 print(result)
             if (not wake_word) and (not text_only_mode) in result:
                 continue
+
+            convo_history.append(result)
 
             if "weather" in result or "temperature" in result:
                 weather_data = ""
@@ -215,12 +220,14 @@ def main():
                 say(text_to_say)
             else:
                 ai_res = send_to_ai(
-                    "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. DO NOT SAY THAT YOU NEED TO PERFORM A WEB SEARCH AND YOU DON'T HAVE REAL TIME ACCESS, JUST WRITE THE WEB SEARCH PROMPT. If you are able to give a quality answer without using an internet search, DO NOT PUT THE PROMPT FOR A WEB SEARCH. If you do not need to perform a web search, please do not mention it in your response. The same thing goes for if you do need to perform a web search, just don't mention it in your response. And please don't put in the web search prompt if you want the user to search something up. In addition to a web search, you also have the ability to play music. If the user requests to play a playlist, write the following WITH THE EXACT WORDING: `play_playlist: <insert playlist name here>`. If the user does not specify the playlist name, write the following WITH THE EXACT WORDING: `play_music`. Now here is the user's prompt: "
+                    "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. DO NOT SAY THAT YOU NEED TO PERFORM A WEB SEARCH AND YOU DON'T HAVE REAL TIME ACCESS, JUST WRITE THE WEB SEARCH PROMPT. If you are able to give a quality answer without using an internet search, DO NOT PUT THE PROMPT FOR A WEB SEARCH. If you do not need to perform a web search, please do not mention it in your response. The same thing goes for if you do need to perform a web search, just don't mention it in your response. And please don't put in the web search prompt if you want the user to search something up. In addition to a web search, you also have the ability to play music. If the user requests to play a playlist, write the following WITH THE EXACT WORDING: `play_playlist: <insert playlist name here>`. If the user does not specify the playlist name, write the following WITH THE EXACT WORDING: `play_music`. I will also provide the conversation history. Please ignore the last element of the list. "
+                    + str(convo_history)
+                    + " Now here is the user's prompt: "
                     + result[len(wake_word) :]
                 )
 
                 send_to_tts = ""
-                if "web\_search" in ai_res.lower():
+                if "web\_search" in ai_res.lower() or "web_search" in ai_res.lower():
                     query = ai_res[len(" web\_search") + 2 :]
                     ddgs_res = DDGS().text(query, max_results=5)
                     ai_summary = send_to_ai(
