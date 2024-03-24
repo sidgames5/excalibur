@@ -25,7 +25,7 @@ wake_word = "hey excalibur".lower()
 # i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
 # you can use any LLM model supported by ollama
-ai_model = "llama2:13b"
+ai_model = "gemma:2b"
 
 # this mode disables voice input and text-to-speech and requires you to type
 text_only_mode = True
@@ -58,6 +58,10 @@ personalization_file_path = "./personalization.txt"
 # enabling this will print out the amount of time it took to generate the response as well as some other statistics
 print_stats = True
 
+# this is the number of threads ollama will use
+# i recommend you put 2 less than the number of threads your cpu has
+threads = 18
+
 
 # DO NOT EDIT THE FOLLOWING
 
@@ -82,10 +86,12 @@ accuweather_location_key = 0
 
 def send_to_ai(content):
     response = client.chat(
-        model="mistral",
+        model=ai_model,
         messages=[
             {"role": "user", "content": content},
         ],
+        options={"num_thread": threads},
+        stream=False,
     )
     return response["message"]["content"]
 
