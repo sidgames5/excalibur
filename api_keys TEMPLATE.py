@@ -1,1 +1,2 @@
-accuweather = "You only need a free accuweather API plan"
+# https://weatherapi.com
+weatherapi = "You only need a free API plan"

@@ -25,7 +25,7 @@ wake_word = "hey excalibur".lower()
 # i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
 # you can use any LLM model supported by ollama
-ai_model = "gemma:2b"
+ai_model = "mistral"
 
 # this mode disables voice input and text-to-speech and requires you to type
 text_only_mode = True
@@ -49,9 +49,9 @@ ip_to_airport_url = "http://localhost:3000"
 # if you are running ollama locally, there is nothing you have to do
 ollama_url = "http://localhost:11434"
 
-# turning this on disables accuweather forecasts
-# this is useful if you don't need forecasts and don't want to waste your accuweather API uses
-enable_weather_forecasts = False
+# turning this on disables forecasts
+# this is useful if you don't need forecasts and don't want to waste your API uses
+enable_weather_forecasts = True
 
 personalization_file_path = "./personalization.txt"
 
@@ -67,7 +67,7 @@ threads = 18
 
 import api_keys
 
-accuweather_api_key = api_keys.accuweather
+weather_api_key = api_keys.weatherapi
 
 # -----------------------------------
 
@@ -82,6 +82,8 @@ with open(personalization_file_path, "r") as f:
 
 
 accuweather_location_key = 0
+latitude = 0
+longitude = 0
 
 
 def send_to_ai(content):
@@ -120,21 +122,13 @@ def main():
     stationresurl = ip_to_airport_url + "/v1?ip=" + ip
     stationres = requests.get(stationresurl)
     weather_station = stationres.text
-    print("Weather data will come from airport " + weather_station + " and AccuWeather")
+    print("Weather data will come from airport " + weather_station + " and Weather API")
     print("Weather data may be for the wrong location if you are using a VPN")
 
-    # Set the accuweather location key
-    geopos = "0, 0"
     iplocres = requests.get("http://ip-api.com/json")
-    geopos = str(iplocres.json()["lat"]) + ", " + str(iplocres.json()["lon"])
-    geopos = urllib.parse.quote(geopos)
-    lockeyres = requests.get(
-        f"http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey={accuweather_api_key}&q={geopos}"
-    )
-    try:
-        accuweather_location_key = lockeyres.json()["Key"]
-    except:
-        accuweather_location_key = 0
+    latitude = iplocres.json()["lat"]
+    longitude = iplocres.json()["lon"]
+    posq = urllib.parse.quote(str(latitude) + "," + str(longitude))
 
     if not text_only_mode:
         model = Model(vosk_model_path)
@@ -185,21 +179,17 @@ def main():
             convo_history.append(result)
 
             current_weather_metar = ""
-            current_weather_12hr = ""
+            current_weather = ""
 
             url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={weather_station}&hours=0"
             response = requests.get(url)
             current_weather_metar = response.text
 
-            aw12hrres = requests.get(
-                f"http://dataservice.accuweather.com/forecasts/v1/hourly/12hour/{accuweather_location_key}?apikey={accuweather_api_key}"
+            resweather = requests.get(
+                f"https://api.weatherapi.com/v1/forecast.json?key={weather_api_key}&q={posq}&days=2&aqi=no&alerts=no"
             )
-            current_weather_12hr = str(aw12hrres.json())
-
-            aw5dres = requests.get(
-                f"http://dataservice.accuweather.com/forecasts/v1/daily/5day/{accuweather_location_key}?apikey={accuweather_api_key}"
-            )
-            current_weather_5d = str(aw5dres.json())
+            current_weather = str(resweather.json())
+            current_weather_json = resweather.json()
 
             current_date_time = datetime.now()
             thours = current_date_time.strftime("%I")
@@ -254,30 +244,31 @@ def main():
                         break
                     elif "CLR" in entry:
                         night = False
-                        if obs.time.hour >= 18 or obs.time.hour <= 6:
+                        if int(current_weather_json["current"]["is_day"]) == 0:
                             night = True
+                            text_to_say = text_to_say + "and clear. "
                         if not night:
                             text_to_say = text_to_say + "and sunny. "
 
                 if enable_weather_forecasts:
                     hitemp = int(
-                        aw5dres.json()["DailyForecasts"][0]["Temperature"]["Maximum"][
-                            "Value"
+                        current_weather_json["forecast"]["forecastday"][0]["day"][
+                            "maxtemp_f"
                         ]
                     )
                     if not units_imperial:
                         hitemp = (hitemp - 32) / 1.8
                     lowtemp = int(
-                        aw5dres.json()["DailyForecasts"][0]["Temperature"]["Minimum"][
-                            "Value"
+                        current_weather_json["forecast"]["forecastday"][0]["day"][
+                            "mintemp_f"
                         ]
                     )
                     if not units_imperial:
                         lowtemp = (lowtemp - 32) / 1.8
 
-                    iconphrase = aw5dres.json()["DailyForecasts"][0]["Day"][
-                        "IconPhrase"
-                    ].lower()
+                    iconphrase = current_weather_json["forecast"]["forecastday"][0][
+                        "day"
+                    ]["condition"]["text"].lower()
 
                     temp_unit = "celsius"
                     if units_imperial:
@@ -312,17 +303,15 @@ def main():
                 ai_res = send_to_ai(
                     "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. DO NOT SAY THAT YOU NEED TO PERFORM A WEB SEARCH AND YOU DON'T HAVE REAL TIME ACCESS, JUST WRITE THE WEB SEARCH PROMPT. If you are able to give a quality answer without using an internet search, DO NOT PUT THE PROMPT FOR A WEB SEARCH. If you do not need to perform a web search, please do not mention it in your response. The same thing goes for if you do need to perform a web search, just don't mention it in your response. And please don't put in the web search prompt if you want the user to search something up. In addition to a web search, you also have the ability to play music. If the user requests to play a playlist, write the following WITH THE EXACT WORDING: `play_playlist: <insert playlist name here>`. If the user does not specify the playlist name, write the following WITH THE EXACT WORDING: `play_music`. I will also provide the conversation history. Please ignore the last element of the list. "
                     + str(convo_history)
-                    + " Please do not write anything along the lines of `based on the conversation history` in your response. When you give your response, pretend that you are talking directly to the user. Absolutely DO NOT put any special instructions in your response if the user does not explicitly state to do that. In addition to all of those resources, you can also use the user's personalization file. Please do not write anything along the lines of `based on your preference` in your response. I will also give you the weather data. Here is the current weather in METAR format: "
+                    + " Please do not write anything along the lines of `based on the conversation history` in your response. When you give your response, pretend that you are talking directly to the user. Absolutely DO NOT put any special instructions in your response if the user does not explicitly state to do that. In addition to all of those resources, you can also use the user's personalization file. Please do not write anything along the lines of `based on your preference` in your response. I will also give you the weather data. You may use this weather data in any weather-related question Here is the current weather in METAR format: "
                     + current_weather_metar
-                    + ". Here is the 12-hour forecast in AccuWeather JSON format: "
-                    + current_weather_12hr
-                    + ". Here is the 5-day forecast in AccuWeather JSON format: "
-                    + current_weather_5d
-                    + ". If the user is asking for the weather or a question relating to or involving the weather, please use the prescribed weather data above. Do not say anything like `based on the provided weather data and the user's prompt`, instead just get to the point (the weather). The time is currently "
+                    + ". Here is the 2-day forecast in JSON format: "
+                    + current_weather
+                    + ". If the user is asking for the weather or a question relating to or involving the weather, please use the prescribed weather data above. Weather questions include things along the lines of `what should I wear` and `what activities should I do`. Do not say anything like `based on the provided weather data and the user's prompt`, instead just get to the point (the weather). The time is currently "
                     + current_time
                     + ". Here is the personalization file: "
                     + personalization
-                    + " Now here is the user's prompt: "
+                    + " (end of personalization file). Again, please please PLEASE write your response as if you are directly talking to the user. Now here is the user's prompt: "
                     + result[len(wake_word) :]
                 )
 

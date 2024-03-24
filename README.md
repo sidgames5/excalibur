@@ -26,6 +26,7 @@ A simple voice assistant that respects your privacy. All voice assistants and sm
 | Weather | 🟦 | 🟩 | 🟩 |
 | Smart device control | ⬛ | ⬛ | ⬛ |
 | Music control | 🟨 | 🟨 | 🟨 |
+| Nextcloud integration | ⬛ | ⬛ | ⬛ |
 
 \* Advanced questions are questions that require searching on the internet
 
