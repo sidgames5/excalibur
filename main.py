@@ -200,11 +200,7 @@ def main():
             else:
                 current_time = current_time + f"{tmins} {tpm}."
 
-            # I messed up the spelling so that it wont trigger it (for testing)
-            if (
-                "weathersdgsdgsgsdgsdgfdsgfdsh" in result
-                or "temperaturedfdfsdgsdgsgsdgsdgsdg" in result
-            ):
+            if "weather" in result or "temperature" in result:
                 weather_data = ""
                 # the station should be changed based on the location
                 url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={weather_station}&hours=0"
@@ -226,17 +222,17 @@ def main():
                     text_to_say = text_to_say + "celsius "
 
                 for entry in sky:
-                    if "OVC" in entry:
+                    if "SN" in entry:
+                        text_to_say = text_to_say + "and snowy. "
+                    elif "RA" in entry:
+                        text_to_say = text_to_say + "and rainy. "
+                    elif (
+                        "OVC" in entry
+                        or "BKN" in entry
+                        or "SCT" in entry
+                        or "FEW" in entry
+                    ):
                         text_to_say = text_to_say + "and cloudy. "
-                        break
-                    elif "BKN" in entry:
-                        text_to_say = text_to_say + "with broken clouds. "
-                        break
-                    elif "SCT" in entry:
-                        text_to_say = text_to_say + "with scattered clouds. "
-                        break
-                    elif "FEW" in entry:
-                        text_to_say = text_to_say + "with few clouds. "
                         break
                     elif "CLR" in entry:
                         night = False
@@ -245,30 +241,33 @@ def main():
                         if not night:
                             text_to_say = text_to_say + "and sunny. "
 
-                ecount = 0
-                for entry in conditions:
-                    if ecount == 0:
-                        text_to_say = text_to_say + "There is currently "
-                    else:
-                        text_to_say = text_to_say + "and "
+                hitemp = int(
+                    aw5dres.json()["DailyForecasts"][0]["Temperature"]["Maximum"][
+                        "Value"
+                    ]
+                )
+                if not units_imperial:
+                    hitemp = (hitemp - 32) / 1.8
+                lowtemp = int(
+                    aw5dres.json()["DailyForecasts"][0]["Temperature"]["Minimum"][
+                        "Value"
+                    ]
+                )
+                if not units_imperial:
+                    lowtemp = (lowtemp - 32) / 1.8
 
-                    ecount += 1
+                iconphrase = aw5dres.json()["DailyForecasts"][0]["Day"][
+                    "IconPhrase"
+                ].lower()
 
-                    if "-" in entry:
-                        text_to_say = text_to_say + "light "
-                    elif "+" in entry:
-                        text_to_say = text_to_say + "heavy "
-                    else:
-                        text_to_say = text_to_say + "moderate "
+                temp_unit = "celsius"
+                if units_imperial:
+                    temp_unit = "fahrenheit"
 
-                    if "SN" in entry:
-                        text_to_say = text_to_say + "snow "
-                    elif "RA" in entry:
-                        text_to_say = text_to_say + "rain "
-                    elif "GR" in entry:
-                        text_to_say = text_to_say + "hail "
-                    elif "BR" in entry:
-                        text_to_say = text_to_say + "mist "
+                text_to_say = (
+                    text_to_say
+                    + f"Today it will be {iconphrase} with a low of {lowtemp} degrees {temp_unit} and a high of {hitemp} degrees {temp_unit}."
+                )
 
                 say(text_to_say)
             elif "time" in result:
