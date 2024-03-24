@@ -25,7 +25,7 @@ wake_word = "hey excalibur".lower()
 # i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
 # you can use any LLM model supported by ollama
-ai_model = "mistral"
+ai_model = "gemma"
 
 # this mode disables voice input and text-to-speech and requires you to type
 text_only_mode = True
@@ -48,6 +48,10 @@ ip_to_airport_url = "http://localhost:3000"
 # if you would like to run ollama on a GPU server, you can change the address of the ollama server here
 # if you are running ollama locally, there is nothing you have to do
 ollama_url = "http://localhost:11434"
+
+# turning this on disables accuweather forecasts
+# this is useful if you don't need forecasts and don't want to waste your accuweather API uses
+enable_weather_forecasts = False
 
 personalization_file_path = "./personalization.txt"
 
@@ -118,7 +122,10 @@ def main():
     lockeyres = requests.get(
         f"http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey={accuweather_api_key}&q={geopos}"
     )
-    accuweather_location_key = lockeyres.json()["Key"]
+    try:
+        accuweather_location_key = lockeyres.json()["Key"]
+    except:
+        accuweather_location_key = 0
 
     if not text_only_mode:
         model = Model(vosk_model_path)
@@ -241,33 +248,34 @@ def main():
                         if not night:
                             text_to_say = text_to_say + "and sunny. "
 
-                hitemp = int(
-                    aw5dres.json()["DailyForecasts"][0]["Temperature"]["Maximum"][
-                        "Value"
-                    ]
-                )
-                if not units_imperial:
-                    hitemp = (hitemp - 32) / 1.8
-                lowtemp = int(
-                    aw5dres.json()["DailyForecasts"][0]["Temperature"]["Minimum"][
-                        "Value"
-                    ]
-                )
-                if not units_imperial:
-                    lowtemp = (lowtemp - 32) / 1.8
+                if enable_weather_forecasts:
+                    hitemp = int(
+                        aw5dres.json()["DailyForecasts"][0]["Temperature"]["Maximum"][
+                            "Value"
+                        ]
+                    )
+                    if not units_imperial:
+                        hitemp = (hitemp - 32) / 1.8
+                    lowtemp = int(
+                        aw5dres.json()["DailyForecasts"][0]["Temperature"]["Minimum"][
+                            "Value"
+                        ]
+                    )
+                    if not units_imperial:
+                        lowtemp = (lowtemp - 32) / 1.8
 
-                iconphrase = aw5dres.json()["DailyForecasts"][0]["Day"][
-                    "IconPhrase"
-                ].lower()
+                    iconphrase = aw5dres.json()["DailyForecasts"][0]["Day"][
+                        "IconPhrase"
+                    ].lower()
 
-                temp_unit = "celsius"
-                if units_imperial:
-                    temp_unit = "fahrenheit"
+                    temp_unit = "celsius"
+                    if units_imperial:
+                        temp_unit = "fahrenheit"
 
-                text_to_say = (
-                    text_to_say
-                    + f"Today it will be {iconphrase} with a low of {lowtemp} degrees {temp_unit} and a high of {hitemp} degrees {temp_unit}."
-                )
+                    text_to_say = (
+                        text_to_say
+                        + f"Today it will be {iconphrase} with a low of {lowtemp} degrees {temp_unit} and a high of {hitemp} degrees {temp_unit}."
+                    )
 
                 say(text_to_say)
             elif "time" in result:
