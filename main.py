@@ -25,7 +25,7 @@ wake_word = "hey excalibur".lower()
 # i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
 # you can use any LLM model supported by ollama
-ai_model = "gemma"
+ai_model = "llama2:13b"
 
 # this mode disables voice input and text-to-speech and requires you to type
 text_only_mode = True
@@ -54,6 +54,9 @@ ollama_url = "http://localhost:11434"
 enable_weather_forecasts = False
 
 personalization_file_path = "./personalization.txt"
+
+# enabling this will print out the amount of time it took to generate the response as well as some other statistics
+print_stats = True
 
 
 # DO NOT EDIT THE FOLLOWING
@@ -207,6 +210,8 @@ def main():
             else:
                 current_time = current_time + f"{tmins} {tpm}."
 
+            compute_begin_time = datetime.now()
+
             if "weather" in result or "temperature" in result:
                 weather_data = ""
                 # the station should be changed based on the location
@@ -335,7 +340,19 @@ def main():
                         pass
                 else:
                     send_to_tts = ai_res
+                compute_end_time = datetime.now()
+                if print_stats:
+                    print(
+                        "Total compute time: "
+                        + str(
+                            (
+                                compute_end_time.timestamp()
+                                - compute_begin_time.timestamp()
+                            )
+                        )
+                    )
                 say(send_to_tts)
+
             continue
 
 
