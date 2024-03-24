@@ -10,6 +10,7 @@ from datetime import datetime
 from metar import Metar
 import requests
 from duckduckgo_search import DDGS
+import urllib.parse
 
 version = "1.1.0-dev"
 
@@ -46,26 +47,30 @@ ip_to_airport_url = "http://localhost:3000"
 
 # if you would like to run ollama on a GPU server, you can change the address of the ollama server here
 # if you are running ollama locally, there is nothing you have to do
-ollama_url = "http://10.0.138.207:11434"
+ollama_url = "http://localhost:11434"
 
 personalization_file_path = "./personalization.txt"
 
 
 # DO NOT EDIT THE FOLLOWING
 
-# import api_keys
+import api_keys
 
-# openweather_api_key = api_keys.openweather
+accuweather_api_key = api_keys.accuweather
 
 # -----------------------------------
 
 client = Client(ollama_url)
 
+global convo_history
 convo_history = []
 
 personalization = ""
 with open(personalization_file_path, "r") as f:
     personalization = f.read()
+
+
+accuweather_location_key = 0
 
 
 def send_to_ai(content):
@@ -92,6 +97,7 @@ def main():
     convo_active = False
     convo_no_talk_time = 0
     convo_no_talk_time_limit = 200
+    convo_expiry_time_limit = 500
 
     print("Version: " + version)
 
@@ -101,8 +107,18 @@ def main():
     stationresurl = ip_to_airport_url + "/v1?ip=" + ip
     stationres = requests.get(stationresurl)
     weather_station = stationres.text
-    print("Weather data will come from airport " + weather_station)
+    print("Weather data will come from airport " + weather_station + " and AccuWeather")
     print("Weather data may be for the wrong location if you are using a VPN")
+
+    # Set the accuweather location key
+    geopos = "0, 0"
+    iplocres = requests.get("http://ip-api.com/json")
+    geopos = str(iplocres.json()["lat"]) + ", " + str(iplocres.json()["lon"])
+    geopos = urllib.parse.quote(geopos)
+    lockeyres = requests.get(
+        f"http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey={accuweather_api_key}&q={geopos}"
+    )
+    accuweather_location_key = lockeyres.json()["Key"]
 
     if not text_only_mode:
         model = Model(vosk_model_path)
@@ -128,10 +144,13 @@ def main():
         else:
             data = stream.read(500)
             convo_no_talk_time += 1
-            if convo_no_talk_time >= convo_no_talk_time_limit:
+            if convo_no_talk_time >= convo_no_talk_time_limit and not text_only_mode:
                 convo_active = False
                 # print(convo_no_talk_time)
                 # print(convo_no_talk_time_limit)
+            if convo_no_talk_time >= convo_expiry_time_limit and not text_only_mode:
+                # convo_history = []
+                pass
         if len(data) == 0:
             continue
         if (not text_only_mode and rec.AcceptWaveform(data)) or (text_only_mode):
@@ -149,7 +168,43 @@ def main():
             convo_no_talk_time = 0
             convo_history.append(result)
 
-            if "weather" in result or "temperature" in result:
+            current_weather_metar = ""
+            current_weather_12hr = ""
+
+            url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={weather_station}&hours=0"
+            response = requests.get(url)
+            current_weather_metar = response.text
+
+            aw12hrres = requests.get(
+                f"http://dataservice.accuweather.com/forecasts/v1/hourly/12hour/{accuweather_location_key}?apikey={accuweather_api_key}"
+            )
+            current_weather_12hr = str(aw12hrres.json())
+
+            aw5dres = requests.get(
+                f"http://dataservice.accuweather.com/forecasts/v1/daily/5day/{accuweather_location_key}?apikey={accuweather_api_key}"
+            )
+            current_weather_5d = str(aw5dres.json())
+
+            current_date_time = datetime.now()
+            thours = current_date_time.strftime("%I")
+            tmins = current_date_time.strftime("%M")
+            tpm = "AM"
+            if clock_24_hours:
+                tpm = ""
+                thours = current_date_time.strftime("%H")
+            else:
+                tpm = current_date_time.strftime("%p")
+            current_time = f"{thours} "
+            if tmins == "00":
+                current_time = current_time + f"o'clock {tpm}."
+            else:
+                current_time = current_time + f"{tmins} {tpm}."
+
+            # I messed up the spelling so that it wont trigger it (for testing)
+            if (
+                "weathersdgsdgsgsdgsdgfdsgfdsh" in result
+                or "temperaturedfdfsdgsdgsgsdgsdgsdg" in result
+            ):
                 weather_data = ""
                 # the station should be changed based on the location
                 url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={weather_station}&hours=0"
@@ -239,7 +294,15 @@ def main():
                 ai_res = send_to_ai(
                     "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. DO NOT SAY THAT YOU NEED TO PERFORM A WEB SEARCH AND YOU DON'T HAVE REAL TIME ACCESS, JUST WRITE THE WEB SEARCH PROMPT. If you are able to give a quality answer without using an internet search, DO NOT PUT THE PROMPT FOR A WEB SEARCH. If you do not need to perform a web search, please do not mention it in your response. The same thing goes for if you do need to perform a web search, just don't mention it in your response. And please don't put in the web search prompt if you want the user to search something up. In addition to a web search, you also have the ability to play music. If the user requests to play a playlist, write the following WITH THE EXACT WORDING: `play_playlist: <insert playlist name here>`. If the user does not specify the playlist name, write the following WITH THE EXACT WORDING: `play_music`. I will also provide the conversation history. Please ignore the last element of the list. "
                     + str(convo_history)
-                    + " Please do not write anything along the lines of `based on the conversation history` in your response. When you give your response, pretend that you are talking directly to the user. Absolutely DO NOT put any special instructions in your response if the user does not explicitly state to do that. In addition to all of those resources, you can also use the user's personalization file. Please do not write anything along the lines of `based on your preference` in your response. Here is the personalization file: "
+                    + " Please do not write anything along the lines of `based on the conversation history` in your response. When you give your response, pretend that you are talking directly to the user. Absolutely DO NOT put any special instructions in your response if the user does not explicitly state to do that. In addition to all of those resources, you can also use the user's personalization file. Please do not write anything along the lines of `based on your preference` in your response. I will also give you the weather data. Here is the current weather in METAR format: "
+                    + current_weather_metar
+                    + ". Here is the 12-hour forecast in AccuWeather JSON format: "
+                    + current_weather_12hr
+                    + ". Here is the 5-day forecast in AccuWeather JSON format: "
+                    + current_weather_5d
+                    + ". If the user is asking for the weather or a question relating to or involving the weather, please use the prescribed weather data above. Do not say anything like `based on the provided weather data and the user's prompt`, instead just get to the point (the weather). The time is currently "
+                    + current_time
+                    + ". Here is the personalization file: "
                     + personalization
                     + " Now here is the user's prompt: "
                     + result[len(wake_word) :]

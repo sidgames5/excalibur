@@ -59,5 +59,6 @@ Currently it is meant to be deployed on a desktop or laptop computer. In theory 
 8. Connect a microphone and speaker to your computer (you can use a built-in one)
 9. Install the required python dependencies listed in the top of `main.py`
 10. Follow the instructions in `personalization TEMPLATE.txt`
-11. Run `python main.py` in a new terminal window
-12. Give microphone access to the program if necessary
+11. Enter the required API keys in `api_keys TEMPLATE.py` then rename it to `api_keys.py`
+12. Run `python main.py` in a new terminal window
+13. Give microphone access to the program if necessary
