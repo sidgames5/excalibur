@@ -6,22 +6,26 @@ A simple voice assistant that respects your privacy. All voice assistants and sm
 
 🟥 Confirmed not working yet
 
+🟧 Waiting for development on other system(s)
+
 🟨 Partially working/in development
 
 🟩 Fully working
 
-⬛ Not tested yet/not implemented
+🟦 Needs testing
+
+⬛ Not implemented
 
 | Feature | Windows | MacOS | Linux |
 |-|-|-|-|
-| Speech recognition | ⬛ | ⬛ | 🟩 |
-| Text to speech | ⬛ | ⬛ | 🟩 |
-| Basic questions | ⬛ | 🟩 | 🟩 |
-| Advanced questions* | ⬛ | ⬛ | 🟩 |
-| Time | ⬛ | 🟩 | 🟩 |
-| Weather | ⬛ | 🟩 | 🟩 |
+| Speech recognition | 🟦 | 🟦 | 🟩 |
+| Text to speech | 🟦 | 🟦 | 🟩 |
+| Basic questions | 🟦 | 🟩 | 🟩 |
+| Advanced questions* | 🟦 | 🟦 | 🟩 |
+| Time | 🟦 | 🟩 | 🟩 |
+| Weather | 🟦 | 🟩 | 🟩 |
 | Smart device control | ⬛ | ⬛ | ⬛ |
-| Music control | ⬛ | ⬛ | 🟨 |
+| Music control | 🟧 | 🟧 | 🟨 |
 
 \* Advanced questions are questions that require searching on the internet
 
