@@ -1,6 +1,4 @@
-import sys
 import os
-import wave
 import json
 from vosk import Model, KaldiRecognizer
 import pyaudio
@@ -22,7 +20,6 @@ vosk_model_path = (
 
 # you can change the wake word to whatever you want
 wake_word = "hey excalibur".lower()
-# i had a bit of trouble with this wake word as the voice recognition system sometimes picked it up as "pseudo"
 
 # you can use any LLM model supported by ollama
 ai_model = "mistral"
@@ -299,6 +296,8 @@ def main():
                 else:
                     text_to_say = text_to_say + f"{tmins} {tpm}."
                 say(text_to_say)
+            elif "hello" in result or "hi" in result:
+                say("Hey, I'm Excalibur! What can I help you with?")
             else:
                 ai_res = send_to_ai(
                     "Respond to the prompt and please keep your response shorter than 50 words. By the way, your name is excalibur. You don't have to announce that your name is excalibur every time I ask you a question. If you need to search the internet, you can! Just write `web_search: <insert the query here>` and nothing else in your response. I repeat, DO NOT INCLUDE ANYTHING BUT THE SEARCH QUERY IN YOUR RESPONSE IF YOU WISH TO PERFORM A WEB SEARCH. DO NOT SAY THAT YOU NEED TO PERFORM A WEB SEARCH AND YOU DON'T HAVE REAL TIME ACCESS, JUST WRITE THE WEB SEARCH PROMPT. If you are able to give a quality answer without using an internet search, DO NOT PUT THE PROMPT FOR A WEB SEARCH. If you do not need to perform a web search, please do not mention it in your response. The same thing goes for if you do need to perform a web search, just don't mention it in your response. And please don't put in the web search prompt if you want the user to search something up. In addition to a web search, you also have the ability to play music. If the user requests to play a playlist, write the following WITH THE EXACT WORDING: `play_playlist: <insert playlist name here>`. If the user does not specify the playlist name, write the following WITH THE EXACT WORDING: `play_music`. I will also provide the conversation history. Please ignore the last element of the list. "
