@@ -10,54 +10,26 @@ import requests
 from duckduckgo_search import DDGS
 import urllib.parse
 
+import config
+import hass
+
 version = "1.1.0-dev"
 
 # ---------- CONFIGURATION ----------
 
-vosk_model_path = (
-    "/home/sid/Documents/code/python/voice-assistant/vosk/vosk-model-en-us-0.22"
-)
-
-# you can change the wake word to whatever you want
-wake_word = "hey excalibur".lower()
-
-# you can use any LLM model supported by ollama
-ai_model = "mistral"
-
-# this mode disables voice input and text-to-speech and requires you to type
-text_only_mode = True
-
-# should the clock be displayed in 24-hour time (19:44) or 12-hour time (7:44 PM)
-clock_24_hours = False
-
-# should units be in imperial
-units_imperial = True
-
-# this is the 4 letter code (ICAO) of your nearest airport
-# this can be found on https://www.faa.gov/air_traffic/weather/asos
-# THIS IS NOT NEEDED ANYMORE
-# as long as you have an internet connection you do not need to set the variable
-weather_station = "KAGC"
-# this is for automatic weather station detection
-# you can find the ip to airport server at https://github.com/sidgames5/ip-to-airport
-ip_to_airport_url = "http://localhost:3000"
-
-# if you would like to run ollama on a GPU server, you can change the address of the ollama server here
-# if you are running ollama locally, there is nothing you have to do
-ollama_url = "http://localhost:11434"
-
-# turning this on disables forecasts
-# this is useful if you don't need forecasts and don't want to waste your API uses
-enable_weather_forecasts = True
-
-personalization_file_path = "./personalization.txt"
-
-# enabling this will print out the amount of time it took to generate the response as well as some other statistics
-print_stats = True
-
-# this is the number of threads ollama will use
-# i recommend you put 2 less than the number of threads your cpu has
-threads = 18
+vosk_model_path = config.vosk_model_path
+wake_word = config.wake_word.lower()
+ai_model = config.ai_model
+text_only_mode = config.text_only_mode
+clock_24_hours = config.clock_24_hours
+units_imperial = config.units_imperial
+weather_station = config.weather_station
+ip_to_airport_url = config.ip_to_airport_url
+ollama_url = config.ollama_url
+enable_weather_forecasts = config.enable_weather_forecasts
+personalization_file_path = config.personalization_file_path
+print_stats = config.debug
+threads = config.threads
 
 
 # DO NOT EDIT THE FOLLOWING

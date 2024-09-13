@@ -6,8 +6,6 @@ A simple voice assistant that respects your privacy. All voice assistants and sm
 
 🟥 Confirmed not working yet
 
-🟧 Waiting for development on other system(s)
-
 🟨 Partially working/in development
 
 🟩 Fully working
@@ -24,8 +22,8 @@ A simple voice assistant that respects your privacy. All voice assistants and sm
 | Advanced questions* | 🟦 | 🟦 | 🟩 |
 | Time | 🟦 | 🟩 | 🟩 |
 | Weather | 🟦 | 🟩 | 🟩 |
-| Smart device control | ⬛ | ⬛ | ⬛ |
-| Music control | 🟨 | 🟨 | 🟨 |
+| Smart device control | ⬛ | ⬛ | 🟨 |
+| Music control | ⬛ | ⬛ | ⬛ |
 | Nextcloud integration | ⬛ | ⬛ | ⬛ |
 
 \* Advanced questions are questions that require searching on the internet
