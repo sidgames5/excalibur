@@ -79,3 +79,23 @@ def lightTurnOff(entity):
     except requests.exceptions.RequestException as e:
         print(f"Error turning off light: {e}")
         return False
+    
+def sceneActivate(entity):
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+    
+    payload = {
+        "entity_id": entity
+    }
+    
+    url = f"{hass_url}/api/services/scene/turn_on"
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        return True
+    except requests.exceptions.RequestException as e:
+        print(f"Error activating scene: {e}")
+        return False
