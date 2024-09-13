@@ -54,7 +54,7 @@ Currently it is meant to be deployed on a desktop or laptop computer. In theory 
 
 1. Install Ollama
 2. Download a [Vosk model](https://alphacephei.com/vosk/models)
-3. Put the location of the Vosk model in the `vosk_model_path` in `main.py`
+3. Put the location of the Vosk model in the `vosk_model_path` in `config.py`
 4. Set a custom wake word by changing `wake_word` in `main.py`*
 5. Set a custom LLM model by changing `ai_model` in `main.py`**
 6. Run `ollama serve` in a terminal window
@@ -63,5 +63,6 @@ Currently it is meant to be deployed on a desktop or laptop computer. In theory 
 9. Install the required python dependencies listed in the top of `main.py`
 10. Follow the instructions in `personalization TEMPLATE.txt`
 11. Enter the required API keys in `api_keys TEMPLATE.py` then rename it to `api_keys.py`
-12. Run `python main.py` in a new terminal window
-13. Give microphone access to the program if necessary
+12. Customize `config.py`
+13. Run `python main.py` in a new terminal window
+14. Give microphone access to the program if necessary
